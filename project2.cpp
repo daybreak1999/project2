@@ -36,7 +36,9 @@ class chain
     public:
         chain() {first = last = NULL;}
         void insert(int r, int c);
-        void inverse();
+        void reverse();
+        void add(chain &b);
+        void print();
     private:
         Step* first;
         Step* last;
@@ -74,6 +76,7 @@ int main()
     robot c(row, col, battery);
     c.in();
     c.setdistance();
+    c.run();
     c.print();
 
     return 0;
@@ -87,7 +90,7 @@ void node::setnode(char sign)
     wall = (sign == '1');
 }
 
-// chain function
+// chain functions
 void chain::insert(int r, int c)
 {
     if (first) {
@@ -96,6 +99,32 @@ void chain::insert(int r, int c)
     }
     else
         first = last = new Step(r, c);
+}
+
+void chain::reverse()
+{
+    Step *current = first, *previous = NULL; 
+    while (current) {
+        Step *r = previous;
+        previous = current;
+        current = current->next;
+        previous->next = r;
+    }
+    last = first;
+    first = previous;
+}
+
+void chain::add(chain &b)
+{
+    if (first) {last->next = b.first; last = b.last;}
+    else {first = b.first; last = b.last;}
+    b.first = b.last = 0;
+}
+
+void chain::print()
+{
+    for (Step *i = first; i ; i = i->next)
+        printf("%d %d\n", i->row, i->col);
 }
 
 // robot functions
@@ -131,6 +160,7 @@ void robot::print()
         }  
         cout << endl;
     } 
+    path.print();
 }
 
 void robot::setdistance() 
@@ -158,6 +188,7 @@ void robot::setdistance(int r, int c, int d)
 
 void robot::run()
 {
+    int k = max_d;
     for (int k = max_d; k > 0; k--){
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
@@ -173,40 +204,41 @@ void robot::expedition(int r, int c)
 {
     chain exped;
     exped.insert(r ,c);
+    floor[r][c].passed = 1;
 
-    while (r == charge_r && c == charge_c) {
+    while (r != charge_r || c != charge_c) {
         // goto block haven't passed 
         if (floor[r + 1][c].distance < floor[r][c].distance &&
             !floor[r + 1][c].wall && !floor[r + 1][c].passed) {
-            exped.insert(++r, c); continue;
-        }
-        if (floor[r - 1][c].distance < floor[r][c].distance &&
-            !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
-            exped.insert(--r, c); continue;
+            exped.insert(++r, c); step++; dirty--; floor[r][c].passed = 1; continue;
         }
         if (floor[r][c + 1].distance < floor[r][c].distance &&
             !floor[r][c + 1].wall && !floor[r][c + 1].passed) {
-            exped.insert(r, ++c); continue;
+            exped.insert(r, ++c); step++; dirty--; floor[r][c].passed = 1; continue;
         }
         if (floor[r][c - 1].distance < floor[r][c].distance &&
             !floor[r][c - 1].wall && !floor[r][c - 1].passed) {
-            exped.insert(r, --c); continue;
+            exped.insert(r, --c); step++; dirty--; floor[r][c].passed = 1; continue;
         }
-
+        if (floor[r - 1][c].distance < floor[r][c].distance &&
+            !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
+            exped.insert(--r, c); step++; dirty--; floor[r][c].passed = 1; continue;
+        }
         // goto block have passed
         if (floor[r + 1][c].distance < floor[r][c].distance &&
             !floor[r + 1][c].wall) {
-            exped.insert(++r, c); continue;
-        }
-        if (floor[r - 1][c].distance < floor[r][c].distance && !floor[r - 1][c].wall) {
-            exped.insert(--r, c); continue;
+            exped.insert(++r, c); step++; continue;
         }
         if (floor[r][c + 1].distance < floor[r][c].distance && !floor[r][c + 1].wall) {
-            exped.insert(r, ++c); continue;
+            exped.insert(r, ++c); step++; continue;
         }
         if (floor[r][c - 1].distance < floor[r][c].distance && !floor[r][c - 1].wall) {
-            exped.insert(r, --c); continue;
+            exped.insert(r, --c); step++;continue;
+        }        
+        if (floor[r - 1][c].distance < floor[r][c].distance && !floor[r - 1][c].wall) {
+            exped.insert(--r, c); step++; continue;
         }
     }
-
+    exped.reverse();
+    path.add(exped);
 }
