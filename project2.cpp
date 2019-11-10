@@ -207,7 +207,8 @@ void robot::run()
             for (int j = 1; j < col -1; j++) {
                 if (floor[i][j].distance == k && !floor[i][j].passed) { 
                     expedition(i, j);
-                    home(i, j);
+                    roam(i, j);
+                //    home(i, j);
                 }
                 if (dirty <= 0) return;
             }
@@ -223,25 +224,20 @@ void robot::expedition(int r, int c)
 
     while (r != charge_r || c != charge_c) {
         // goto block haven't passed 
-        if (floor[r + 1][c].distance < floor[r][c].distance &&
-            !floor[r + 1][c].wall && !floor[r + 1][c].passed) {
+        if (floor[r + 1][c].distance < floor[r][c].distance && !floor[r + 1][c].wall && !floor[r + 1][c].passed) {
             exped.insert(++r, c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r][c + 1].distance < floor[r][c].distance &&
-            !floor[r][c + 1].wall && !floor[r][c + 1].passed) {
+        if (floor[r][c + 1].distance < floor[r][c].distance && !floor[r][c + 1].wall && !floor[r][c + 1].passed) {
             exped.insert(r, ++c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r][c - 1].distance < floor[r][c].distance &&
-            !floor[r][c - 1].wall && !floor[r][c - 1].passed) {
+        if (floor[r][c - 1].distance < floor[r][c].distance && !floor[r][c - 1].wall && !floor[r][c - 1].passed) {
             exped.insert(r, --c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r - 1][c].distance < floor[r][c].distance &&
-            !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
+        if (floor[r - 1][c].distance < floor[r][c].distance && !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
             exped.insert(--r, c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
         // goto block have passed
-        if (floor[r + 1][c].distance < floor[r][c].distance &&
-            !floor[r + 1][c].wall) {
+        if (floor[r + 1][c].distance < floor[r][c].distance && !floor[r + 1][c].wall) {
             exped.insert(++r, c); step++; q--; continue;
         }
         if (floor[r][c + 1].distance < floor[r][c].distance && !floor[r][c + 1].wall) {
@@ -262,44 +258,35 @@ void robot::expedition(int r, int c)
 
 void robot::roam(int r, int c)
 {
-    while (q - floor[r][c].distance >= 2) {
+    while (q - floor[r][c].distance >= 2  && (r != charge_r || c != charge_c)) {
         // goto block haven't passed & far
-        if (floor[r + 1][c].distance > floor[r][c].distance &&
-            !floor[r + 1][c].wall && !floor[r + 1][c].passed) {
+        if (floor[r + 1][c].distance > floor[r][c].distance && !floor[r + 1][c].wall && !floor[r + 1][c].passed) {
             path.insert(++r, c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r][c + 1].distance > floor[r][c].distance &&
-            !floor[r][c + 1].wall && !floor[r][c + 1].passed) {
+        if (floor[r][c + 1].distance > floor[r][c].distance && !floor[r][c + 1].wall && !floor[r][c + 1].passed) {
             path.insert(r, ++c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r][c - 1].distance > floor[r][c].distance &&
-            !floor[r][c - 1].wall && !floor[r][c - 1].passed) {
+        if (floor[r][c - 1].distance > floor[r][c].distance && !floor[r][c - 1].wall && !floor[r][c - 1].passed) {
             path.insert(r, --c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r - 1][c].distance > floor[r][c].distance &&
-            !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
+        if (floor[r - 1][c].distance > floor[r][c].distance && !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
             path.insert(--r, c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
         // go back block haven't passed         
-        if (floor[r + 1][c].distance < floor[r][c].distance &&
-            !floor[r + 1][c].wall && !floor[r + 1][c].passed) {
+        if (floor[r + 1][c].distance < floor[r][c].distance && !floor[r + 1][c].wall && !floor[r + 1][c].passed) {
             path.insert(++r, c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r][c + 1].distance < floor[r][c].distance &&
-            !floor[r][c + 1].wall && !floor[r][c + 1].passed) {
+        if (floor[r][c + 1].distance < floor[r][c].distance && !floor[r][c + 1].wall && !floor[r][c + 1].passed) {
             path.insert(r, ++c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r][c - 1].distance < floor[r][c].distance &&
-            !floor[r][c - 1].wall && !floor[r][c - 1].passed) {
+        if (floor[r][c - 1].distance < floor[r][c].distance && !floor[r][c - 1].wall && !floor[r][c - 1].passed) {
             path.insert(r, --c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
-        if (floor[r - 1][c].distance < floor[r][c].distance &&
-            !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
+        if (floor[r - 1][c].distance < floor[r][c].distance && !floor[r - 1][c].wall && !floor[r - 1][c].passed) {
             path.insert(--r, c); step++; dirty--; q--; floor[r][c].passed = 1; continue;
         }
         // go back block have passed
-        if (floor[r + 1][c].distance < floor[r][c].distance &&
-            !floor[r + 1][c].wall) {
+        if (floor[r + 1][c].distance < floor[r][c].distance && !floor[r + 1][c].wall) {
             path.insert(++r, c); step++; q--; continue;
         }
         if (floor[r][c + 1].distance < floor[r][c].distance && !floor[r][c + 1].wall) {
